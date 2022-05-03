@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>Definir status</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+<!--===============================================================================================-->	
+<link rel="icon" type="image/png" href="/assets/images1/logo.jpg"/>
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="/assets/vendor/bootstrap/css/bootstrap.min.css">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="/assets/fonts/font-awesome-4.7.0/css/font-awesome.min.css">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="/assets/vendor/animate/animate.css">
+<!--===============================================================================================-->	
+	<link rel="stylesheet" type="text/css" href="/assets/vendor/css-hamburgers/hamburgers.min.css">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="/assets/vendor/select2/select2.min.css">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="/assets/css1/util.css">
+	<link rel="stylesheet" type="text/css" href="/assets/css1/main.css">
+<!--===============================================================================================-->
+</head>
+<body>
+	
+	<div class="limiter" id="login">
+		<div class="container-login100">
+			<div class="wrap-login100">
+                <div>
+					<img width="100%" height="100%" src="assets/images1/ls.jpg" alt="IMG">
+				</div>
+				<div class="login101-pic js-tilt" data-tilt>
+                    <img style="border-radius: 50%;" src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/529582/img_avatar3.png" alt="IMG">
+                    <span class="login100-form-title" style="margin-top: 20px;">
+                        <%= user.first_name %>  <%= user.last_name %>
+                    </span>
+                </div>
+
+				<div  class="login100-form validate-form">
+                    <span id="time" class="login100-form-title">
+						
+					</span>
+					<span class="login100-form-title">
+						Definissez votre status
+					</span>
+					<div id = "latepage">
+						<div id="late" style="display:block;margin-top: 20px;" class="alert alert-info" role="alert">
+							Vous etes en retard de <%= retard %> 
+						  </div>
+						  <div class="wrap-input100 validate-input">
+							<label for="exampleFormControlTextarea1" class="form-label">La raison de votre retard :</label>
+							<textarea id="latereason" style="background: rgba(30, 152, 233, 0.5)" class="form-control">
+							</textarea>
+
+						</div>
+						<div class="wrap-input100 validate-input">
+							<button id="bntsr" onclick="reason()" class="login100-form-btn">
+								ENVOYER
+							</button>
+						</div></div>
+						<div id="statpage">
+					<div class="wrap-input100 validate-input">
+						
+					<select id="locaux" class="input100" onchange="getloc()" style="border-color: transparent;">
+						<option value="Not defined">Ou vous etes</option>
+						<option value="Tana Water Front">Tana Water Front</option>
+						<option value="IKANO">IKANO</option>
+						<option value="Travaille a domicile">Travaille a domicile</option>
+						<option value="En dehors du bureau"> En dehors du bureau</option>
+					</select>
+					<div id="info" style="display:none;margin-top: 20px;" class="alert alert-info" role="alert">
+                        Here is an information
+                      </div>
+				</div id="statpage">
+					<div class="wrap-input100 validate-input">
+						<button id="w" onclick="working()" class="login100-form-btn">
+							TRAVAILLER
+						</button>
+					</div>
+                    <div class="wrap-input100 validate-input">
+						<button id="a" onclick="away()" class="login10a-form-btn">
+							ABSENT
+						</button>
+					</div>
+                    <div class="wrap-input100 validate-input">
+						<button id="l" onclick="left()" class="login10l-form-btn">
+							PARTI
+						</button>
+					</div>
+                    <br>
+                    <span class="login100-form-title">
+						STATUS ACTUEL
+					</span>
+                    <div class="wrap-input100 validate-input">
+                        <center>
+						<button id="s" class="login101-form-btn">
+							
+						</button>
+                    </center>
+					</div>
+				</div>
+
+					<div class="text-center p-t-136">
+						<h1 class="txt2">
+							Application Solumada, Copyright 2022
+						</h1>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script src="/js_code/socket.js"></script>
+	<script src="/js_code/timecontrole.js"></script>
+	<script src="/assets/js1/workin.js"></script>
+<script>
+  var retard = '<%= retard %>'; 
+  var latepage = document.getElementById("latepage");
+  var statpage = document.getElementById("statpage");
+  if (retard == "n"){
+	  latepage.style.display = "none";
+  }
+  else{
+	  statpage.style.display  = "none";
+  }
+  var socket = io();
+  var locatenow = document.getElementById("locaux");
+  var locaux = "<%= user.act_loc %>";
+  document.getElementById("locaux").value = locaux;
+  var awaystat = false;
+  var status = "<%= user.act_stat %>";
+  if (status == "WORKING" ){
+	  awaystat = true;
+	workings();
+	document.getElementById("s").innerHTML = "TRAVAILLER";
+  }
+  else if(status == "AWAY"){
+	  awaystat = true;
+	aways();
+	document.getElementById("s").innerHTML = "ABSENT(E)";
+  }
+  else{
+	lefts();
+	w.style.display = "none";
+		a.style.display = "none";
+		l.style.display = "none";
+	document.getElementById("s").innerHTML = "NON DEFINI";
+  }
+  
+  function working(){
+	  workings();
+	  socket.emit("actuel","TRAVAILLER"+','+'<%= user.m_code %>');
+	  socket.emit("loc",document.getElementById("locaux").value);
+	  if (awaystat == false){
+		senddata1();
+	  }
+	  awaystat = false;
+	  sendstatus(locatenow.value,"WORKING");
+  }
+  function left(){
+	senddata2(document.getElementById("locaux").value);
+	lefts();
+	awaystat = false;
+	socket.emit("actuel","LEFTING"+','+'<%= user.m_code %>');
+	sendstatus("Not defined","LEFTING");
+}
+function away(){
+	awaystat = true;
+	aways();
+	socket.emit("actuel","AWAY"+','+'<%= user.m_code %>');
+	sendstatus(locatenow.value,"AWAY");
+}
+function sendstatus(loc,stat){
+    var http = new XMLHttpRequest();
+    http.open("POST", "/statuschange", true);
+    http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+    http.onreadystatechange = function () {
+      if (this.readyState == 4 && this.status == 200) {
+          if (this.responseText == "error"){
+             
+          }
+          else{
+            
+          }
+          
+      }
+    };
+    http.send("act_loc="+loc+"&act_stat="+stat);
+}
+var latereason = document.getElementById("latereason");
+function reason(){
+    if (latereason.value != ""){
+        sendreason("/reason",latereason.value);
+    }
+}
+function sendreason(url,reasons) {
+    var http = new XMLHttpRequest();
+    http.open("POST", url, true);
+    http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+    http.onreadystatechange = function () {
+      if (this.readyState == 4 && this.status == 200) {
+        latepage.style.display = "none";
+		statpage.style.display = "block";
+      }
+    };
+    http.send("reason="+reasons);
+  }
+function getloc(){
+	if (locatenow.value == "Not defined"){
+		w.style.display = "none";
+		a.style.display = "none";
+		l.style.display = "none";
+	}
+	else{
+		w.style.display = "block";
+		a.style.display = "block";
+		l.style.display = "block";
+		a.disabled = true;
+		l.disabled = true;
+	}
+}
+</script>
+	<script src="/assets/vendor/jquery/jquery-3.2.1.min.js"></script>
+<!--===============================================================================================-->
+	<script src="/assets/vendor/bootstrap/js/popper.js"></script>
+	<script src="/assets/vendor/bootstrap/js/bootstrap.min.js"></script>
+<!--===============================================================================================-->
+	<script src="/assets/vendor/select2/select2.min.js"></script>
+<!--===============================================================================================-->
+	<script src="/assets/vendor/tilt/tilt.jquery.min.js"></script>
+	<script >
+		$('.js-tilt').tilt({
+			scale: 1.1
+		})
+	</script>
+<!--===============================================================================================-->
+	<script src="/assets/js1/main.js"></script>
+	
+</body>
+</html>
